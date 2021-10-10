@@ -1,0 +1,16 @@
+certifi==2021.10.8
+charset-normalizer==2.0.6
+eth-hash==0.3.2
+fastecdsa==2.2.1
+idna==3.2
+jsonrpcclient==4.0.1
+protobuf==3.18.1
+pyaes==1.6.1
+pyasn1==0.4.8
+pycryptodome==3.11.0
+pyethash==0.1.27
+pyzil==1.5.22
+requests==2.26.0
+rsa==4.7.2
+Telethon==1.23.0
+urllib3==1.26.7
