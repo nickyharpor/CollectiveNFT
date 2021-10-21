@@ -403,9 +403,11 @@ transition CancelContract()
   ContractIsNotExpired;
   IsContractOwner;
   current_total_supply <- total_supply;
-  match current_total_supply with
-    | zero =>
+  is_zero = builtin eq current_total_supply zero;
+  match is_zero with
+    | True =>
       contract_status := contract_is_cancelled_status
+    | False =>
   end
 end
 
