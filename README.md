@@ -80,9 +80,9 @@ ___
 ## Unlocking NFTs
 
 The contract owner can unlock all NFTs (i.e. send them away to another
-address) only if `total_supply` is equal to `zero`. If you locked up your
-NFT and didn't sell any token, you can then `CancelContract` to be able to 
-unlock and move your NFT. Unlocking NFTs is also possible if all buyers 
+address) only if the contract is _expired_ or _cancelled_. If you locked up 
+your NFT and didn't sell any token, you can then `CancelContract` to be able to 
+unlock and move your NFT. Cancelling contract is also possible if all buyers 
 decide to burn their tokens, resulting in `total_supply = zero`. Obviously,
 when the contract expires and all buyers are paid back, you can move away
 your NFT as well.
