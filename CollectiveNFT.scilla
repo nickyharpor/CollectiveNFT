@@ -1,0 +1,538 @@
+(* CollectiveNFT contract *)
+
+(***************************************************)
+(*                 Scilla version                  *)
+(***************************************************)
+
+(* 0.7.1 *)
+scilla_version 0
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+
+import BoolUtils PairUtils IntUtils ListUtils
+library CollectiveNFT
+
+let true = True
+let false = False
+let zero = Uint128 0
+let one = Uint256 1
+let hundred = Uint128 100
+let one_o_one = Uint128 101
+
+let contract_is_not_started_status = Uint32 100
+let contract_is_active_status = Uint32 200
+let contract_is_closed_status = Uint32 300
+let contract_is_cancelled_status = Uint32 400
+let contract_is_expired_status = Uint32 500
+let contract_is_null_status = Uint32 600
+
+let one_msg =
+  fun (msg : Message) =>
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+let two_msgs =
+fun (msg1 : Message) =>
+fun (msg2 : Message) =>
+  let msgs_tmp = one_msg msg2 in
+  Cons {Message} msg1 msgs_tmp
+
+let build_nft =
+  fun (nft_contract_address : ByStr20) =>
+  fun (token_id : Uint256) =>
+    Pair {ByStr20 Uint256} nft_contract_address token_id
+
+let get_val =
+  fun (some_val: Option Uint128) =>
+  match some_val with
+  | Some val => val
+  | None => zero
+  end
+
+(* Error exception *)
+type Error =
+  | CodeNotContractOwner
+  | CodeIsSelf
+  | CodeCannotAddNFTInThisPhase
+  | CodeCannotBuyTokenInThisPhase
+  | CodeInsufficientFunds
+  | CodeNFTDoesNotExist
+  | CodeContractHasExpired
+  | CodeCannotRemoveNFTInThisPhase
+  | CodeCannotCloseContractInThisPhase
+  | CodeNotTokenOwner
+  | CodeCannotBurnTokensInThisPhase
+  | CodeContractHasNotExpired
+
+let make_error =
+  fun (result : Error) =>
+    let result_code =
+      match result with
+      | CodeNotContractOwner                => Int32 -1
+      | CodeIsSelf                          => Int32 -2
+      | CodeCannotAddNFTInThisPhase         => Int32 -3
+      | CodeCannotBuyTokenInThisPhase       => Int32 -4
+      | CodeInsufficientFunds               => Int32 -5
+      | CodeNFTDoesNotExist                 => Int32 -6
+      | CodeContractHasExpired              => Int32 -7
+      | CodeCannotRemoveNFTInThisPhase      => Int32 -8
+      | CodeCannotCloseContractInThisPhase  => Int32 -9
+      | CodeNotTokenOwner                   => Int32 -10
+      | CodeCannotBurnTokensInThisPhase     => Int32 -11
+      | CodeContractHasNotExpired           => Int32 -12
+      end
+    in
+    { _exception : "Error"; code : result_code }
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+
+contract CollectiveNFT
+(
+  contract_owner: ByStr20,
+  name : String,
+  symbol: String,
+  decimals: Uint32,
+  init_price: Uint128,
+  interest_ratio: Uint128,
+  burn_ratio: Uint128,
+  expiration_block: BNum
+)
+with
+  let c1 = builtin blt _creation_block expiration_block in
+  let c2 = builtin lt burn_ratio one_o_one in
+  andb c1 c2
+=>
+
+(* Mutable fields *)
+
+field total_supply : Uint128 = zero
+
+(* Price can't be changed in this version of contract *)
+field current_price : Uint128 = init_price
+
+field balances: Map ByStr20 Uint128
+  = let emp_map = Emp ByStr20 Uint128 in
+    builtin put emp_map contract_owner zero
+
+field allowances: Map ByStr20 (Map ByStr20 Uint128)
+  = Emp ByStr20 (Map ByStr20 Uint128)
+
+field contract_status : Uint32 = contract_is_not_started_status
+
+(* Number of NFTs this contract wraps a.k.a NFT number for each NFT Pair *)
+field nft_count: Uint256 = Uint256 0
+
+(* Mapping from NFT number to NFT Pair *)
+field wrapped_nft: Map Uint256 Pair ByStr20 Uint256 = Emp Uint256 Pair ByStr20 Uint256
+
+(**************************************)
+(*             Procedures             *)
+(**************************************)
+
+(* Emit Errors *)
+procedure ThrowError(err : Error)
+  e = make_error err;
+  throw e
+end
+
+procedure CheckBlock()
+  (* don't check if contract status is already expired, cancelled, or nulled *)
+  current_status <- contract_status;
+  is_already_expired = builtin eq current_status contract_is_expired_status;
+  is_null = builtin eq current_status contract_is_null_status;
+  is_cancelled = builtin eq current_status contract_is_cancelled_status;
+  is_expired_or_null = orb is_already_expired is_null;
+  is_any = orb is_cancelled is_expired_or_null;
+  match is_any with
+    | True =>
+    | False =>
+      blk <- & BLOCKNUMBER;
+      is_expired = builtin blt expiration_block blk;
+      match is_expired with
+        | True =>
+          (* check if there is enough liquidity *)
+          current_total_supply <- total_supply;
+          price <- current_price;
+          received_zil = builtin div current_total_supply price;
+          zil_with_interest_times_hundred = builtin mul received_zil interest_ratio;
+          zil_with_interest = builtin div zil_with_interest_times_hundred hundred;
+          bal <- _balance;
+          is_liquidity_enough = uint128_le zil_with_interest bal;
+          match is_liquidity_enough with
+            | True =>
+              contract_status := contract_is_expired_status
+            | False =>
+              contract_status := contract_is_null_status
+          end
+        | False =>
+      end
+  end
+end
+
+procedure ContractIsNotExpired()
+  CheckBlock;
+  current_status <- contract_status;
+  is_expired = builtin eq current_status contract_is_expired_status;
+  is_null = builtin eq current_status contract_is_null_status;
+  is_any = orb is_expired is_null;
+  match is_any with
+    | True =>
+      err = CodeContractHasExpired;
+      ThrowError err
+    | False =>
+  end
+end
+
+procedure ContractIsExpiredOrNull()
+  current_status <- contract_status;
+  is_expired = builtin eq current_status contract_is_expired_status;
+  is_null = builtin eq current_status contract_is_null_status;
+  is_any = orb is_expired is_null;
+  match is_any with
+    | True =>
+    | False =>
+      err = CodeContractHasNotExpired;
+      ThrowError err
+  end
+end
+
+procedure CanCloseContract()
+  current_status <- contract_status;
+  is_not_started = builtin eq current_status contract_is_not_started_status;
+  is_active = builtin eq current_status contract_is_active_status;
+  is_any = orb is_not_started is_active;
+  match is_any with
+    | True =>
+    | False =>
+      err = CodeCannotCloseContractInThisPhase;
+      ThrowError err
+  end
+end
+
+procedure CanBurnTokens()
+  current_status <- contract_status;
+  is_closed = builtin eq current_status contract_is_closed_status;
+  is_active = builtin eq current_status contract_is_active_status;
+  is_any = orb is_closed is_active;
+  match is_any with
+    | True =>
+    | False =>
+      is_null = builtin eq current_status contract_is_null_status;
+      match is_null with
+        | True =>
+        | False =>
+          err = CodeCannotBurnTokensInThisPhase;
+          ThrowError err
+      end
+  end
+end
+
+procedure CanRemoveNFTs()
+  current_status <- contract_status;
+  is_cancelled = builtin eq current_status contract_is_cancelled_status;
+  is_expired = builtin eq current_status contract_is_expired_status;
+  is_any = orb is_cancelled is_expired;
+  match is_any with
+    | True =>
+    | False =>
+      err = CodeCannotRemoveNFTInThisPhase;
+      ThrowError err
+  end
+end
+
+(*@param contractAddress - address of NFT contract*)
+(*@param tokenID - NFT token ID*)
+(*@param to - address of receiver*)
+procedure TransferNFT (contract_address: ByStr20, token_id: Uint256, to: ByStr20)
+  transfered = {
+    _tag: "Transfer";
+    _recipient: contract_address;
+    _amount: Uint128 0;
+    to: to;
+    token_id: token_id
+  };
+  msgs = one_msg transfered;
+  send msgs
+end
+
+procedure TransferZIL (to: ByStr20, amount: Uint128)
+  msg  = {_tag : ""; _recipient : to; _amount : amount};
+  msgs = one_msg msg;
+  send msgs
+end
+
+procedure AuthorizedMoveIfSufficientBalance(from: ByStr20, to: ByStr20, amount: Uint128)
+  o_from_bal <- balances[from];
+  bal = get_val o_from_bal;
+  can_do = uint128_le amount bal;
+  match can_do with
+  | True =>
+    (* Subtract amount from from and add it to to address *)
+    new_from_bal = builtin sub bal amount;
+    balances[from] := new_from_bal;
+    (* Adds amount to to address *)
+    get_to_bal <- balances[to];
+    new_to_bal = match get_to_bal with
+    | Some bal => builtin add bal amount
+    | None => amount
+    end;
+    balances[to] := new_to_bal
+  | False =>
+    (* Balance not sufficient *)
+    err = CodeInsufficientFunds;
+    ThrowError err
+  end
+end
+
+procedure IsContractOwner()
+  is_contract_owner = builtin eq contract_owner _sender;
+  match is_contract_owner with
+  | True =>
+  | False =>
+    err = CodeNotContractOwner;
+    ThrowError err
+  end
+end
+
+procedure AcceptNFT(from : ByStr20, token_id : Uint256)
+  accept;
+  input_nft = build_nft from token_id;
+  current_nft_count <- nft_count;
+  new_nft_count = builtin add current_nft_count one;
+  nft_count := new_nft_count;
+  nft_id <- nft_count;
+  wrapped_nft[nft_id] := input_nft
+end
+
+(***************************************)
+(*             Transitions             *)
+(***************************************)
+
+(* Tokens are sold only when contract is active *)
+(*{status == active}*)
+transition BuyTokens()
+  ContractIsNotExpired;
+  current_status <- contract_status;
+  is_active = builtin eq current_status contract_is_active_status;
+  match is_active with
+    | True =>
+      accept;
+      price <- current_price;
+      add_bal = builtin mul _amount price;
+      o_from_bal <- balances[_sender];
+      bal = get_val o_from_bal;
+      new_bal = builtin add bal add_bal;
+      balances[_sender] := new_bal;
+      current_total_supply <- total_supply;
+      new_total_supply = builtin add current_total_supply add_bal;
+      total_supply := new_total_supply
+    | False =>
+      err = CodeCannotBuyTokenInThisPhase;
+      ThrowError err
+  end
+end
+
+(* @dev: Moves an amount tokens from _sender to the recipient. Used by token_owner. *)
+(* @dev: Balance of recipient will increase. Balance of _sender will decrease.      *)
+(* @param to:  Address of the recipient whose balance is increased.                 *)
+(* @param amount:     Amount of tokens to be sent.                                  *)
+transition TransferTokens(to: ByStr20, amount: Uint128)
+  CheckBlock;
+  AuthorizedMoveIfSufficientBalance _sender to amount;
+  e = {_eventname : "TransferSuccess"; sender : _sender; recipient : to; amount : amount};
+  event e;
+  (* Prevent sending to a contract address that does not support transfers of token *)
+  msg_to_recipient = {_tag : "RecipientAcceptTransfer"; _recipient : to; _amount : zero;
+                      sender : _sender; recipient : to; amount : amount};
+  msg_to_sender = {_tag : "TransferSuccessCallBack"; _recipient : _sender; _amount : zero;
+                  sender : _sender; recipient : to; amount : amount};
+  msgs = two_msgs msg_to_recipient msg_to_sender;
+  send msgs
+end
+
+(* Token owners can burn their tokens before the end of the contract period *)
+(*{status == active, closed, null}*)
+transition BurnTokens(amount: Uint128)
+  CheckBlock;
+  CanBurnTokens;
+  is_amount_zero = builtin eq amount zero;
+  o_from_bal <- balances[_sender];
+  bal = get_val o_from_bal;
+  is_balance_zero = builtin eq bal zero;
+  dont_continue = orb is_amount_zero is_balance_zero;
+  match dont_continue with
+    | False =>
+      can_do = uint128_le amount bal;
+      match can_do with
+        | False =>
+          (* Burn it all! *)
+          balances[_sender] := zero;
+          current_total_supply <- total_supply;
+          new_total_supply = builtin sub current_total_supply bal;
+          total_supply := new_total_supply;
+          price <- current_price;
+          original_zil_equivalent = builtin div bal price;
+          zil_to_refund_times_hundred = builtin mul original_zil_equivalent burn_ratio;
+          zil_to_refund = builtin div zil_to_refund_times_hundred hundred;
+          TransferZIL _sender zil_to_refund
+        | True =>
+          new_bal = builtin sub bal amount;
+          balances[_sender] := new_bal;
+          current_total_supply <- total_supply;
+          new_total_supply = builtin sub current_total_supply amount;
+          total_supply := new_total_supply;
+          price <- current_price;
+          original_zil_equivalent = builtin div amount price;
+          zil_to_refund_times_hundred = builtin mul original_zil_equivalent burn_ratio;
+          zil_to_refund = builtin div zil_to_refund_times_hundred hundred;
+          TransferZIL _sender zil_to_refund
+      end
+    | True =>
+      err = CodeInsufficientFunds;
+      ThrowError err
+  end
+end
+
+(* Owner can cancel contract only when there is no token in circulation *)
+(*{status == not_started, active, closed}*)
+transition CancelContract()
+  ContractIsNotExpired;
+  IsContractOwner;
+  current_total_supply <- total_supply;
+  match current_total_supply with
+    | zero =>
+      contract_status := contract_is_cancelled_status
+  end
+end
+
+(*{status == not_started, active}*)
+transition CloseContract()
+  ContractIsNotExpired;
+  CanCloseContract;
+  IsContractOwner;
+  contract_status := contract_is_closed_status
+end
+
+(*{status == not_started, active, closed}*)
+transition AddFunds()
+  ContractIsNotExpired;
+  accept
+end
+
+(*{status != expired, null}*)
+transition MoveFunds(to: ByStr20, amount: Uint128)
+  ContractIsNotExpired;
+  IsContractOwner;
+  TransferZIL to amount
+end
+
+(*{status == expired, null}*)
+transition ClaimFunds()
+  CheckBlock;
+  ContractIsExpiredOrNull;
+  o_from_bal <- balances[_sender];
+  bal = get_val o_from_bal;
+  is_balance_zero = builtin eq bal zero;
+  match is_balance_zero with
+    | True =>
+      err = CodeNotTokenOwner;
+      ThrowError err
+    | False =>
+      (* Calculate interest *)
+      price <- current_price;
+      amount = builtin div bal price;
+      interest_mul = builtin add interest_ratio hundred;
+      with_interest_times_hundred = builtin mul amount interest_mul;
+      with_interest = builtin div with_interest_times_hundred hundred;
+      balances[_sender] := zero;
+      current_total_supply <- total_supply;
+      new_total_supply = builtin sub current_total_supply bal;
+      total_supply := new_total_supply;
+      TransferZIL _sender with_interest
+  end
+end
+
+(* Owner can send away NFTs when contract is cancelled or expired with interests paid *)
+(*{status == expired, cancelled}*)
+transition RemoveNFT(to: ByStr20, nft_num: Uint256)
+  CheckBlock;
+  CanRemoveNFTs;
+  nft_exists <- exists wrapped_nft[nft_num];
+  match nft_exists with
+    | True =>
+      nft_option <- wrapped_nft[nft_num];
+      match nft_option with
+        | Some val =>
+          nft = val;
+          get_nft_contract = @fst ByStr20 Uint256;
+          nft_contract = get_nft_contract nft;
+          get_token_id = @snd ByStr20 Uint256;
+          token_id = get_token_id nft;
+          TransferNFT nft_contract token_id to;
+          delete wrapped_nft[nft_num];
+          current_nft_count <- nft_count;
+          new_nft_count = builtin sub current_nft_count one;
+          nft_count := new_nft_count
+        | None =>
+      end
+    | False =>
+      err = CodeNFTDoesNotExist;
+      ThrowError err
+  end
+end
+
+transition UpdateStatus()
+  CheckBlock
+end
+
+transition RecipientAcceptTransfer
+(from : ByStr20, recipient : ByStr20, token_id : Uint256)
+  ContractIsNotExpired;
+  current_status <- contract_status;
+  is_not_started = builtin eq current_status contract_is_not_started_status;
+  match is_not_started with
+    | True =>
+      AcceptNFT _sender token_id;
+      contract_status := contract_is_active_status
+    | False =>
+      is_active = builtin eq current_status contract_is_active_status;
+      match is_active with
+        | True =>
+          AcceptNFT _sender token_id
+        | False =>
+          err = CodeCannotAddNFTInThisPhase;
+          ThrowError err
+      end
+  end
+end
+
+transition RecipientAcceptTransferFrom
+(from : ByStr20, recipient : ByStr20, token_id : Uint256)
+  ContractIsNotExpired;
+  current_status <- contract_status;
+  is_not_started = builtin eq current_status contract_is_not_started_status;
+  match is_not_started with
+    | True =>
+      AcceptNFT _sender token_id;
+      contract_status := contract_is_active_status
+    | False =>
+      is_active = builtin eq current_status contract_is_active_status;
+      match is_active with
+        | True =>
+          AcceptNFT _sender token_id
+        | False =>
+          err = CodeCannotAddNFTInThisPhase;
+          ThrowError err
+      end
+  end
+end
+
+transition TransferSuccessCallBack
+(from : ByStr20, recipient : ByStr20, token_id : Uint256)
+end
+
+
