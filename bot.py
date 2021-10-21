@@ -134,7 +134,7 @@ async def b_new(event):
             await conv.send_message('🔐 Please enter your private key to deploy the contract:\n\n'
                                     '🧏🏼 Private key is used only for this transaction and is NOT logged or stored. '
                                     'Don\'t believe it? Learn [how to make your own bot]'
-                                    '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                    '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                     link_preview=False)
             private_key_msg = await handle
             private_key = private_key_msg.text.strip()
@@ -361,7 +361,7 @@ async def b_buy(event):
                                             '🔐 Please enter your private key:\n\n'
                                             '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                             ' Don\'t believe it? Learn [how to make your own bot]'
-                                            '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                            '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                             link_preview=False)
                     private_key_msg = await handle
                     try:
@@ -431,7 +431,7 @@ async def b_transfer(event):
                                                 + ' to ' + to + '.\n\n🔐 Please enter your private key:\n\n'
                                                 '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                                 ' Don\'t believe it? Learn [how to make your own bot]'
-                                                '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                                '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                                 link_preview=False)
                         private_key_msg = await handle
                         try:
@@ -503,7 +503,7 @@ async def b_burn(event):
                                             + ' for ' + refund_str + ' Zil.\n\n🔐 Please enter your private key:\n\n'
                                             '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                             ' Don\'t believe it? Learn [how to make your own bot]'
-                                            '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                            '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                             link_preview=False)
                     private_key_msg = await handle
                     private_key = private_key_msg.text.strip()
@@ -552,7 +552,7 @@ async def b_cancel(event):
                 await conv.send_message('🗑 You\'re about to cancel the contract.\n\n🔐 Please enter your private key:\n\n'
                                         '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                         ' Don\'t believe it? Learn [how to make your own bot]'
-                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                         link_preview=False)
                 private_key_msg = await handle
                 try:
@@ -600,7 +600,7 @@ async def b_close(event):
                 await conv.send_message('🚧 You\'re about to close the contract.\n\n🔐 Please enter your private key:\n\n'
                                         '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                         ' Don\'t believe it? Learn [how to make your own bot]'
-                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                         link_preview=False)
                 private_key_msg = await handle
                 try:
@@ -650,7 +650,7 @@ async def b_add(event):
                                             '\n\n🔐 Please enter your private key:\n\n'
                                             '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                             ' Don\'t believe it? Learn [how to make your own bot]'
-                                            '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                            '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                             link_preview=False)
                     private_key_msg = await handle
                     try:
@@ -711,7 +711,7 @@ async def b_move(event):
                                                 + '.\n\n🔐 Please enter your private key:\n\n'
                                                   '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                                   ' Don\'t believe it? Learn [how to make your own bot]'
-                                                  '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                                  '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                                 link_preview=False)
                         private_key_msg = await handle
                         try:
@@ -762,7 +762,7 @@ async def b_claim(event):
                                         '\n\n🔐 Please enter your private key:\n\n'
                                         '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                         ' Don\'t believe it? Learn [how to make your own bot]'
-                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                         link_preview=False)
                 private_key_msg = await handle
                 try:
@@ -816,7 +816,7 @@ async def b_unlock(event):
                                                 + '.\n\n🔐 Please enter your private key:\n\n'
                                                   '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                                   ' Don\'t believe it? Learn [how to make your own bot]'
-                                                  '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                                  '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                                 link_preview=False)
                         private_key_msg = await handle
                         try:
@@ -885,7 +885,7 @@ async def b_update(event):
                                         '\n\n🔐 Please enter your private key:\n\n'
                                         '🧏🏼 Private key is used only for this transaction and is NOT logged or stored.'
                                         ' Don\'t believe it? Learn [how to make your own bot]'
-                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/master/your_own_bot.md).',
+                                        '(https://github.com/nickyharpor/CollectiveNFT/blob/main/your_own_bot.md).',
                                         link_preview=False)
                 private_key_msg = await handle
                 try:
@@ -935,8 +935,9 @@ async def b_help(event):
 
 @bot.on(events.NewMessage())
 async def echo(event):
-    pass
+    # uncomment for debug
     # print(event.text)
+    pass
 
 
 def main():
