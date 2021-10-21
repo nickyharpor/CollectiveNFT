@@ -935,8 +935,8 @@ async def b_help(event):
 
 @bot.on(events.NewMessage())
 async def echo(event):
-    # uncomment for debug
-    print(event.text)
+    pass
+    # print(event.text)
 
 
 def main():
