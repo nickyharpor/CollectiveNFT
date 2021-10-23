@@ -25,6 +25,9 @@ If you're a developer or auditor, for more details, please visit [this page](con
 ### Learn: [NFT Owner Walkthrough](owner_walkthrough.md) | [Lenders Walkthrough](lenders_walkthrough.md)
 ### Use: [Telegram Bot](https://t.me/collective_nft_bot) (testnet) | [CollectiveNFT Web dApp](dapp)
 
+Telegram bot is recommended. You can [make your own Telegram bot](your_own_bot.md) 
+as well. 
+
 ___
 
 ## Basic Usage (for devs and auditors)
