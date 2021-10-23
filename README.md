@@ -23,7 +23,7 @@ If you're a developer or auditor, for more details, please visit [this page](con
 ## Quick Start (for everyone)
 
 ### Learn: [NFT Owner Walkthrough](owner_walkthrough.md) | [Lenders Walkthrough](lenders_walkthrough.md)
-### Use: [Telegram Bot](https://t.me/collective_nft_bot) (testnet) | CollectiveNFT Web dApp (WIP)
+### Use: [Telegram Bot](https://t.me/collective_nft_bot) (testnet) | [CollectiveNFT Web dApp](dapp) (work in progress; try in ~24 hours)
 
 ___
 
