@@ -1,0 +1,55 @@
+
+.full {
+  padding: 0 !important;
+  margin: 0 auto !important;
+  background-size: cover;
+  overflow: hidden;
+  background-image:url('../assets/bg-masthead.jpeg');
+  /* Add the blur effect */
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+/* Position text in the middle of the page/image */
+.bg-text {
+  /*background-color: rgb(0,0,0); !* Fallback color *!*/
+  /*background-color: rgba(0,0,0, 0.4); !* Black w/opacity/see-through *!*/
+  color: white;
+  font-weight: bold;
+  /*border: 3px solid #f1f1f1;*/
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 80%;
+  padding: 20px;
+  text-align: center;
+  color: black;
+  background: linear-gradient(rgb(0 0 0 / 90%), rgba(255, 255, 255, 0));
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  --bs-text-opacity: 1;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.dapp-title{
+  font-size: 5.5rem;
+  line-height: 6.5rem;
+  letter-spacing: 0.8rem;
+  text-transform: uppercase;
+}
+.btn-outline-primary{
+  color: #fff;
+}
+.danger{
+  color: whitesmoke;
+  background: #951d32;
+  padding: .6em;
+  max-width: 700px;
+  margin: 0 auto;
+  border-radius: 1em;
+}

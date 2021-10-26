@@ -1,0 +1,689 @@
+<div class="container-fluid">
+  <div class="row text-center" id="home">
+      <span class="mt-3">
+      Add:{{userAdd32}}
+      </span>
+  </div>
+  <div class="container">
+    <div *ngIf="!walletConnected" class="danger mt-5 pt-5" role="alert">
+      As this CollectiveNFT dApp using <a href="https://zilpay.io/">'zilPay'</a> wallet to connect to the zilliqa
+      blockchain, so it's necessary to:
+      <ul>
+        <li>install zilPay wallet extension,</li>
+        <li>create | import your wallet</li>
+        <li>confirm the CollectiveNFT dApp connection request</li>
+        <li>finally press Connect button!</li>
+      </ul>
+      then you can start your journey with CollectiveNFT dApp :)
+      <button type="button" class="btn btn-success btn-block mt-5 mb-3" (click)="connectWallet()">
+        Connect
+      </button>
+    </div>
+  </div>
+  <hr class="my-5">
+  <!-- Section: Components -->
+  <section id="check">
+    <div class="container">
+      <div class="check-main-sec">
+
+        <div class="text-center mb-5">
+          <h4><strong>Check contract details</strong></h4>
+        </div>
+        <div class="container">
+          <div class="row text-center">
+            <div class="mb-3">
+              🔖 Please enter the contract address
+            </div>
+            <div class="w-100">
+              <div class="input-group mb-3" style="max-width: 600px;
+margin: 0 auto;">
+                <input type="text" class="form-control" placeholder="Contract Address" aria-label="Contract Address"
+                       autofocus
+                       aria-describedby="button-addon2" [(ngModel)]="contractAdd"
+                       (ngModelChange)="checkAddChange()"
+                       maxlength="42"/>
+                <button class="btn btn-outline-primary" type="button" id="button-addon2" data-mdb-ripple-color="dark"
+                        (click)="checkAddChange()">
+                  check
+                </button>
+              </div>
+              <div *ngIf="showCheckError" class="danger" role="alert">
+                {{checkErrorMessage}}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <section *ngIf="showCheckRes">
+        <div class="check-res-sec row  mt-3">
+          <div class="col-md-6">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="nav flex-column nav-pills text-center" id="v-pills-tab" role="tablist"
+                     aria-orientation="vertical">
+                  <a class="nav-link active" id="v-pills-buy-tab" data-mdb-toggle="pill" href="#v-pills-buy" role="tab"
+                     aria-controls="v-pills-home" aria-selected="true">Buy Token</a>
+                  <a class="nav-link " id="v-pills-transfer-tab" data-mdb-toggle="pill" href="#v-pills-transfer"
+                     role="tab" aria-controls="v-pills-home">Transfer Token</a>
+                  <a class="nav-link " id="v-pills-burn-tab" data-mdb-toggle="pill" href="#v-pills-burn" role="tab"
+                     aria-controls="v-pills-home">Burn Token</a>
+                  <a class="nav-link " id="v-pills-add-fund-tab" data-mdb-toggle="pill" href="#v-pills-add-fund"
+                     role="tab" aria-controls="v-pills-home">Add Fund</a>
+                  <a class="nav-link " id="v-pills-claim-fund-tab" data-mdb-toggle="pill" href="#v-pills-claim-fund"
+                     role="tab" aria-controls="v-pills-home">Claim Fund</a>
+                  <a *ngIf="sameUserAndOwner" class="nav-link " id="v-pills-cancel-tab" data-mdb-toggle="pill"
+                     href="#v-pills-cancel"
+                     role="tab" aria-controls="v-pills-home">Cancel</a>
+                  <a *ngIf="sameUserAndOwner" class="nav-link " id="v-pills-close-tab" data-mdb-toggle="pill"
+                     href="#v-pills-close"
+                     role="tab" aria-controls="v-pills-home">Close</a>
+                  <a *ngIf="sameUserAndOwner" class="nav-link " id="v-pills-unlock-tab" data-mdb-toggle="pill"
+                     href="#v-pills-unlock"
+                     role="tab" aria-controls="v-pills-home">Unlock</a>
+                  <a *ngIf="sameUserAndOwner" class="nav-link " id="v-pills-move-tab" data-mdb-toggle="pill"
+                     href="#v-pills-move"
+                     role="tab" aria-controls="v-pills-home">Move</a>
+
+                </div>
+              </div>
+              <div class="col-md-8">
+                <div class="tab-content" id="v-pills-tabContent">
+                  <div class="tab-pane fade show active" id="v-pills-buy" role="tabpanel"
+                       aria-labelledby="v-pills-buy-tab">
+                    <section *ngIf="showBuyForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Buy</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="fs-6">💁🏼 How many {{checkSymbol}} do you want to buy?</div>
+                            <input type="number" class="form-control" placeholder="Amount to buy"
+                                   aria-label="Amount to buy"
+                                   (ngModelChange)="buyAmountChange($event)"
+                                   [(ngModel)]="buyAmount"/>
+                            <div class="mt-2 fs-6">
+                              💰 You're about to buy  {{buyAmount}} {{checkSymbol}} for {{buyZilPrice}} zil
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="buyToken()">
+                              Buy
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showBuyRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">{{buyInfo}}</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>Amount: </strong>{{buyAmount}} {{checkSymbol}} | {{buyZilPrice}} zil</li>
+                            <li><strong>Gas Price: </strong>{{buyGas}} zil</li>
+                            <li><strong>Transaction ID: </strong>{{buyTranID}}</li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{buyTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="tab-pane fade" id="v-pills-transfer" role="tabpanel"
+                       aria-labelledby="v-pills-transfer-tab">
+                    <section *ngIf="showTransferForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Transfer</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="fs-6">💁🏼 Who do you want to transfer to? (base16 address)</div>
+                            <input type="text" class="form-control" placeholder="Transfer to address"
+                                   aria-label="Transfer to Address"
+                                   [(ngModel)]="transferToAddress"/>
+                            <div class="fs-6 mt-4">💁🏼 How many {{checkSymbol}} do you want to transfer?</div>
+                            <input type="number" class="form-control" placeholder="Amount to transfer"
+                                   aria-label="Amount to transfer"
+                                   [(ngModel)]="transferAmount"/>
+                            <div class="mt-2 fs-6">
+                              💰 You're about to transfer  {{transferAmount}} {{checkSymbol}} to {{transferToAddress}}
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="transferToken()">
+                              Transfer
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showTransferRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">{{transferInfo}}</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>Amount: </strong>{{transferAmount}} qa</li>
+                            <li><strong>Gas Price: </strong>{{transferGas}} zil</li>
+                            <li><strong>Transaction ID: </strong>{{transferTranID}}</li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{transferTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="tab-pane fade" id="v-pills-burn" role="tabpanel" aria-labelledby="v-pills-burn-tab">
+                    <section *ngIf="showBurnForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Burn</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="fs-6 mt-4">💁🏼 How many {{checkSymbol}} do you want to burn?</div>
+                            <input type="number" class="form-control" placeholder="Amount to transfer"
+                                   aria-label="Amount to transfer"
+                                   [(ngModel)]="burnAmount"/>
+                            <div class="mt-2 fs-6">
+                              💰 You're about to burn {{burnAmount}} {{checkSymbol}}
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="burnToken()">
+                              Burn
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showBurnRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">{{burnInfo}}</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>Amount: </strong>{{burnAmount}} qa</li>
+                            <li><strong>Gas Price: </strong>{{burnGas}} zil</li>
+                            <li><strong>Transaction ID: </strong>{{burnTranID}}</li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="tab-pane fade" id="v-pills-add-fund" role="tabpanel"
+                       aria-labelledby="v-pills-claim-fund-tab">
+                    <section *ngIf="showAddFundForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Add Fund</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="fs-6 mt-4">💁🏼 How many Zils do you want to add to the contract?</div>
+                            <input type="number" class="form-control" placeholder="Amount to add fund"
+                                   aria-label="Amount to transfer"
+                                   [(ngModel)]="addFundAmount"/>
+                            <div class="mt-2 fs-6">
+                              💰 You're about to add {{addFundAmount}} zil
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="addFund()">
+                              Add
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showAddFundRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">{{addFundInfo}}</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>Amount: </strong>{{addFundAmount}} qa</li>
+                            <li><strong>Gas Price: </strong>{{addFundGas}} zil</li>
+                            <li><strong>Transaction ID: </strong>{{addFundTranID}}</li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{addFundTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="tab-pane fade" id="v-pills-claim-fund" role="tabpanel"
+                       aria-labelledby="v-pills-messages-tab">
+                    <section *ngIf="showClaimFundForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Claim Fund</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="mt-2 fs-4">
+                              📥 You're about to claim your funds with {{checkInterestRatio}}% interest.
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="claimFund()">
+                              Claim
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showClaimFundRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">{{addFundInfo}}</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>Amount: </strong>{{addFundAmount}} qa</li>
+                            <li><strong>Gas Price: </strong>{{addFundGas}} zil</li>
+                            <li><strong>Transaction ID: </strong>{{addFundTranID}}</li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{claimFundTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="tab-pane fade" id="v-pills-close" role="tabpanel" aria-labelledby="v-pills-close-tab">
+                    <section *ngIf="showCloseForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Close</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="mt-2 fs-6">
+                              🚧 You're about to close the contract.
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="closeContract()">
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showCloseRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">✅</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>{{closeResMessage}}</strong></li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{closeTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="tab-pane fade" id="v-pills-cancel" role="tabpanel" aria-labelledby="v-pills-cancel-tab">
+                    <section *ngIf="showCancelForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Cancel</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="mt-2 fs-6">
+                              🚧 You're about to cancel the contract.
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="cancelContract()">
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showCancelRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">✅</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>{{cancelResMessage}}</strong></li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{cancelTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="tab-pane fade" id="v-pills-unlock" role="tabpanel" aria-labelledby="v-pills-unlock-tab">
+                    <section *ngIf="showUnlockForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Unlock</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="fs-6">💁🏼 Which NFT do you want to unlock?</div>
+                            <input type="text" class="form-control" placeholder="Transfer to address"
+                                   aria-label="Transfer to Address"
+                                   [(ngModel)]="unlockNFTID"/>
+                            <div class="fs-6 mt-2">💁🏼 What address do you want to move the NFT to?</div>
+                            <input type="text" class="form-control" placeholder="Transfer to address"
+                                   aria-label="Transfer to Address"
+                                   [(ngModel)]="unlockToAdd"/>
+                            <div class="mt-2 fs-6">
+                              🔓 You're about to move NFT {{unlockNFTID}} to {{unlockToAdd}}
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="unlockContract()">
+                              Unlock
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showUnlockRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">✅</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>{{unlockResMessage}}</strong></li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{unlockTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="tab-pane fade" id="v-pills-move" role="tabpanel" aria-labelledby="v-pills-move-tab">
+                    <section *ngIf="showMoveForm">
+                      <div>
+                        <div class="card mt-2">
+                          <div class="card-header bg-white text-center py-3">
+                            <h5 class="mb-0 fw-bold">Move</h5>
+                          </div>
+                          <div class="card-body text-start">
+                            <div class="fs-6">💁🏼 How many Zils do you want to move?</div>
+                            <input type="text" class="form-control" placeholder="Move Amount"
+                                   aria-label="Transfer to Address"
+                                   [(ngModel)]="moveAmount"/>
+                            <div class="fs-6 mt-2">💁🏼 What address do you want to move funds to?</div>
+                            <input type="text" class="form-control " placeholder="Move to address"
+                                   aria-label="Transfer to Address"
+                                   [(ngModel)]="moveToAdd"/>
+                            <div class="mt-2 fs-6">
+                              🔓 You're about to move {{moveAmount}} zil to {{moveToAdd}}
+                            </div>
+                          </div>
+                          <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <button type="button" class="btn btn-success btn-block mb-4" (click)="move()">
+                              Move
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section *ngIf="showMoveRes">
+                      <div class="card">
+                        <div class="card-header bg-white text-center py-3">
+                          <h5 class="mb-0 fw-bold">✅</h5>
+                        </div>
+                        <div class="card-body text-start">
+                          <ul>
+                            <li><strong>{{moveResMessage}}</strong></li>
+                            <li>Make sure deployment <strong>confirmation</strong> by visiting <a
+                              href="https://viewblock.io/zilliqa/tx/{{moveTranID}}?network=testnet" target="_blank"> this link</a></li>
+                          </ul>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="col-md-1"></div>
+          <div class="card col-md-5">
+            <div class="card-header bg-white text-center py-3">
+              <h5 class="mb-0 fw-bold">{{checkContractStatus}}</h5>
+            </div>
+            <div class="card-body text-start">
+              <ul>
+                <li><strong>Balance: </strong>{{contractBalance}} zil</li>
+                <li><strong>Name: </strong>{{checkName}}</li>
+                <li><strong>Current Block: </strong>#{{latestBlockNo}}</li>
+                <li><strong>Creation Block: </strong>#{{checkCreationBlock}}</li>
+                <li><strong>Expiration Block: </strong>#{{checkExpirationBlock}}</li>
+                <li><strong>Init Price: </strong>{{checkInitPrice}}</li>
+                <li><strong>Decimal: </strong>{{checkDecimal}}</li>
+                <li><strong>Interest Ratio: </strong>{{checkInterestRatio}}%</li>
+                <li><strong>Burn Ratio: </strong>{{checkBurnRatio}}%</li>
+                <li><strong>Current Price: </strong>{{contractCurrentPrice}} zil</li>
+                <li><strong>NFT Count: </strong>{{contractNFTCount}}</li>
+                <li><strong>Owner Add: </strong>{{checkContractOwnerAdd}}</li>
+              </ul>
+            </div>
+            <section *ngIf="contractNFTs.length > 0">
+              <hr class="my-2">
+              <div>
+                <h5 class="mb-0 fw-bold">NFTs</h5>
+                <div class="text-start">
+                  <ul>
+                    <li *ngFor="let nft of contractNFTs">
+                      <strong>contract: {{nft.conAdd}}</strong>, id: <strong>{{nft.id}}</strong>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+            <div class="card-footer bg-white d-flex justify-content-between py-3">
+              <strong>Total supply:</strong>
+              <strong>{{contractTotalSupply}} {{checkSymbol}}</strong>
+            </div>
+          </div>
+
+
+        </div>
+      </section>
+    </div>
+  </section>
+  <hr class="my-5">
+  <!-- Section: Components -->
+  <section id="create">
+    <div class="container-fluid">
+      <div class="check-main-sec">
+        <div class="text-center mb-5">
+          <h4><strong>Create new contract</strong></h4>
+        </div>
+        <div class="container">
+          <div class="row text-center">
+            <div class="mb-3 text-start">
+              ℹ️ By creating a new contract, you can lock up your NFTs as collateral and get loans.
+              <br>
+              ℹ️ Each contract expires at a specified block number.
+              <br>
+              ℹ️ Make sure the contract has enough
+              Zil liquidity to pay back everyone with interest, otherwise you'll lose your NFTs.
+              <br>
+              ℹ️ Each block takes about 45 seconds to 4 minutes to be mined.
+              <br>
+              ⚠️ Note that <strong>current</strong> block number is: #{{latestBlockNo}}
+            </div>
+            <hr class="my-3">
+            <div *ngIf="showCreateError" class="danger" role="alert">
+              {{createErrorMessage}}
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="w-100">
+                  <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Contract Name" aria-label="Contract Name"
+                           [(ngModel)]="createName"
+                           maxlength="42"/>
+                  </div>
+                  <div class="form-text mt-2 mb-3">
+                    Descriptive token name
+                  </div>
+                </div>
+                <div class="w-100">
+                  <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Contract Symbol"
+                           aria-label="Contract Symbol"
+                           [(ngModel)]="createSymbol"/>
+                  </div>
+                  <div class="form-text mt-2 mb-3">
+                    Symbol for your token
+                  </div>
+                </div>
+                <div class="w-100">
+                  <div class="input-group">
+
+                    <input class="form-control" placeholder="Contract Expiration Year" required
+                           min="2021" max="2999"
+                           aria-label="Contract Expiration Year"
+                           [(ngModel)]="createExpirationYear" (ngModelChange)="createExpirationDateChange()"/>
+                    <input type="text" class="form-control" placeholder="Contract Expiration Month"
+                           min="1" max="12"
+                           aria-label="Contract Expiration Month"
+                           [(ngModel)]="createExpirationMonth" (ngModelChange)="createExpirationDateChange()"/>
+                    <input type="text" class="form-control" placeholder="Contract Expiration Month"
+                           min="1" max="31"
+                           aria-label="Contract Expiration Month"
+                           [(ngModel)]="createExpirationDay" (ngModelChange)="createExpirationDateChange()"/>
+
+                  </div>
+                  <div class="form-text mt-2 mb-3">
+                    Date the contract will be expired -> YYYY-MM-DD
+                  </div>
+                </div>
+                <div class="w-100">
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="Contract token price"
+                           aria-label="Contract token price"
+                           [(ngModel)]="createTokenPrice" (ngModelChange)="createTokenPriceChange()"/>
+                  </div>
+                  <div class="form-text mt-2 mb-3">
+                    Contract token price
+                  </div>
+                </div>
+                <div class="w-100">
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="Contract interest ratio"
+                           min="0" max="100"
+                           aria-label="Contract interest ratio"
+                           [(ngModel)]="createInterestRatio"/>
+                  </div>
+                  <div class="form-text mt-2 mb-3">
+                    Contract interest ratio
+                  </div>
+                </div>
+                <div class="w-100">
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="Contract burn ratio"
+                           min="0" max="100"
+                           aria-label="Contract burn ratio"
+                           [(ngModel)]="createBurnRatio"/>
+                  </div>
+                  <div class="form-text mt-2 mb-3">
+                    Contract burn ratio
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+              </div>
+              <div class="col-md-4">
+                <section *ngIf="showCreateDetails">
+
+
+                  <div class="card mt-4">
+                    <div class="card-header bg-white text-center py-3">
+                      <h5 class="mb-0 fw-bold">Summary</h5>
+                    </div>
+
+                    <div class="card-body text-start">
+                      <ul>
+                        <li><strong>Name: </strong>{{createName}}</li>
+                        <li><strong>Symbol: </strong>{{createSymbol}}</li>
+                        <li><strong>Expiration Block: </strong>{{createExpirationBlock}}</li>
+                        <li><strong>Init Price: </strong>{{createInitPrice}}</li>
+                        <li><strong>Decimal: </strong>{{createDecimal}}</li>
+                        <li><strong>Interest Ratio: </strong>{{createInterestRatio}}%</li>
+                        <li><strong>Burn Ratio: </strong>{{createBurnRatio}}%</li>
+                      </ul>
+                    </div>
+
+                    <div class="card-footer bg-white d-flex justify-content-between py-3">
+                      <button type="button" class="btn btn-success btn-block mb-4" (click)="deployContract()">
+                        create
+                      </button>
+                    </div>
+                  </div>
+                </section>
+                <section *ngIf="showCreateRes">
+                  <div class="card">
+                    <div class="card-header bg-white text-center py-3">
+                      <h5 class="mb-0 fw-bold">Contract transaction was sent to the blockchain</h5>
+                    </div>
+
+                    <div class="card-body text-start">
+                      <ul>
+                        <li>Contract address:<strong>{{creatResAdd}}</strong></li>
+                        <li>make sure deployment confirmation by visiting <a
+                          href="https://viewblock.io/zilliqa/tx/{{createTnxID}}?network=testnet" target="_blank"> this link</a></li>
+                      </ul>
+                    </div>
+
+                    <div class="card-footer bg-white d-flex justify-content-between py-3">
+                      <strong>Gas:</strong>
+                      <strong>{{creatResGasPrice}}</strong>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
