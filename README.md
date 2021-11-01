@@ -2,6 +2,8 @@
 
 _Submission for: https://gitcoin.co/issue/Zilliqa/Zilliqa/2715/100026477_
 
+Email: nickyharpor [at-sign] mail [dot] ru
+
 **Collective NFT** allows NFT owners on Zilliqa network to lock up their NFTs
 as collateral, and mint fungible tokens representing a share of the locked-up 
 NFTs. This allows them to make their NFTs more liquid and multiple lenders 
