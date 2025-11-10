@@ -23,7 +23,7 @@ If you're a developer or auditor, for more details, please visit [this page](con
 ## Quick Start (for everyone)
 
 ### Learn: [NFT Owner Walkthrough](owner_walkthrough.md) | [Lenders Walkthrough](lenders_walkthrough.md)
-### Use: [Telegram Bot](https://t.me/collective_nft_bot) (testnet) | [CollectiveNFT Web dApp](dapp)
+### Use: ~~[Telegram Bot](https://t.me/collective_nft_bot)~~ (offline) | [CollectiveNFT Web dApp](dapp)
 
 Telegram bot is recommended. You can [make your own Telegram bot](your_own_bot.md) 
 as well. 
@@ -124,3 +124,4 @@ loses the NFTs, minted tokens will represent the NFT, and can be traded).
   
 * Add reminder/notification feature to the Telegram bot and the dApp to 
 notify interested parties when the expiration time is close.
+
